@@ -1,0 +1,349 @@
+openapi: 3.0.3
+info:
+  title: Twitter Project API
+  version: 1.0.0
+tags:
+  - name: tweets
+  - name: medias
+  - name: users
+paths:
+  /tweets:
+    post:
+      tags:
+        - tweets
+      description: Запросом на этот endpoint пользователь будет создавать новый твит.Бэкенд будет его валидировать и сохранять в базу.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                api-key:
+                  type: string
+                tweet_data:
+                  type: string
+                tweet_media_ids:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: Successful creation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                  tweet_id:
+                    type: integer
+        '500':
+          description: Server error
+
+  /tweets/{id}:
+    delete:
+      tags:
+        - tweets
+      description: Delete a tweet
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful deletion
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+
+  /tweets/{id}/likes:
+    post:
+      tags:
+        - tweets
+      description: Like a tweet
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful liking
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+    delete:
+      tags:
+        - tweets
+        - likes
+      description: Unlike a tweet
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful unliking
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+
+  /users/me:
+    get:
+      tags:
+        - users
+      description: Get current user profile
+      parameters:
+        - name: api-key
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      followers:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                      following:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+
+  /users/{id}:
+    get:
+      tags:
+        - users
+      description: Get user profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: api-key
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      followers:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                      following:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+
+  /users/{id}/follow:
+    post:
+      tags:
+        - users
+      description: Follow a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: api-key
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful follow
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+    delete:
+      tags:
+        - users
+      description: Unfollow a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: api-key
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful unfollow
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+
+  /api/tweets:
+    get:
+      tags:
+        - tweets
+      description: Get tweet feed
+      parameters:
+        - name: api-key
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                  tweets:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        content:
+                          type: string
+                        attachments:
+                          type: array
+                          items:
+                            type: string
+                        author:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                        likes:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              user_id:
+                                type: integer
+                              name:
+                                type: string
+    /media:
+    post:
+      tags:
+        - medias
+      description: Upload media file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                api-key:
+                  type: string
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Successful upload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                  media_id:
+                    type: integer
+        '400':
+          description: Invalid file type
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+

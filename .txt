@@ -1,0 +1,190 @@
+№1.
+
+POST /api/tweets
+HTTP-Params:
+api-key: str
+{
+“tweet_data”: string
+“tweet_media_ids”: Array[int] // Опциональный параметр. Загрузка
+картинок будет происходить по endpoint /api/media. Фронтенд будет
+подгружать картинки туда автоматически при отправке твита и подставлять
+id оттуда в json.
+}
+Запросом на этот endpoint пользователь будет создавать новый твит.
+Бэкенд будет    его валидировать и сохранять в базу.
+В ответ должен вернуться id созданного твита.
+{
+“result”: true,
+“tweet_id”: int
+}
+
+№2.
+
+Endpoint для загрузки файлов из твита. Загрузка происходит через
+отправку формы.
+POST /api/medias
+HTTP-Params:
+api-key: str
+form: file=”image.jpg”
+В ответ должен вернуться id загруженного файла.
+{
+“result”: true,
+“media_id”: int
+}
+
+№3.
+
+Ещё нам потребуется endpoint по удалению твита. В этом endpoint мы
+должны убедиться, что пользователь удаляет именно свой собственный твит.
+DELETE /api/tweets/<id>
+HTTP-Params:
+api-key: str
+В ответ должно вернуться сообщение о статусе операции.
+{
+“result”: true
+}
+
+№4.
+
+Пользователь может поставить отметку «Нравится» на твит.
+POST /api/tweets/<id>/likes
+HTTP-Params:
+api-key: str
+В ответ должно вернуться сообщение о статусе операции.
+{
+“result”: true
+}
+
+№5.
+
+Пользователь может убрать отметку «Нравится» с твита.
+DELETE /api/tweets/<id>/likes
+HTTP-Params:
+api-key: str
+В ответ должно вернуться сообщение о статусе операции.
+{
+“result”: true
+}
+
+№6.
+
+Пользователь может зафоловить другого пользователя.
+POST /api/users/<id>/follow
+HTTP-Params:
+api-key: str
+В ответ должно вернуться сообщение о статусе операции.
+{
+“result”: true
+}
+
+№7.
+
+Пользователь может убрать подписку на другого пользователя.
+DELETE /api/users/<id>/follow
+HTTP-Params:
+api-key: str
+В ответ должно вернуться сообщение о статусе операции.
+{
+“result”: true
+}
+
+№8.
+
+Пользователь может получить ленту с твитами.
+GET /api/tweets
+HTTP-Params:
+api-key: str
+В ответ должен вернуться json со списком твитов для ленты этого
+пользователя.
+
+{
+“result”: true,
+"tweets": [
+{
+"id": int,
+"content": string,
+"attachments" [
+link_1, // relative?
+link_2,
+...
+]
+"author": {
+"id": int
+"name": string
+}
+“likes”: [
+{
+“user_id”: int,
+“name”: string
+}
+]
+},
+...,
+]
+}
+
+№9.
+
+В случае любой ошибки на стороне бэкенда возвращайте сообщение
+следующего формата:
+{
+“result”: false,
+“error_type”: str,
+“error_message”: str
+}
+
+№10.
+
+Пользователь может получить информацию о своём профиле:
+GET /api/users/me
+HTTP-Params:
+api-key: str
+В ответ получаем:
+{
+"result":"true",
+"user":{
+"id":"int",
+"name":"str",
+"followers":[
+{
+"id":"int",
+"name":"str"
+}
+],
+"following":[
+{
+"id":"int",
+"name":"str"
+}
+]
+}
+}
+
+№11.
+
+Пользователь может получить информацию о произвольном профиле по его
+id:
+GET /api/users/<id>
+В ответ получаем:
+{
+"result":"true",
+"user":{
+"id":"int",
+"name":"str",
+"followers":[
+{"id":"int",
+"name":"str"
+}
+],
+"following":[
+{
+"id":"int",
+"name":"str"
+}
+]
+}
+}
+
+
+
+
