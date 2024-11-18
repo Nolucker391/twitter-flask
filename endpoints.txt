@@ -1,3 +1,9 @@
+curl -X POST \
+     -H "Content-Type: application/json" \
+     -d '{"tweet_data": "Это тестовый твит"}' \
+     http://localhost:5050/api/tweets
+
+
 №1.
 
 POST /api/tweets

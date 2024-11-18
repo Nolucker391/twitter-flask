@@ -4,8 +4,9 @@ info:
   version: 1.0.0
 tags:
   - name: tweets
-  - name: medias
   - name: users
+  - name: medias
+  - name: likes
 paths:
   /tweets:
     post:
@@ -41,7 +42,55 @@ paths:
                     type: integer
         '500':
           description: Server error
-
+    get:
+      tags:
+        - tweets
+      description: Get tweet feed
+      parameters:
+        - name: api-key
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                  tweets:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        content:
+                          type: string
+                        attachments:
+                          type: array
+                          items:
+                            type: string
+                        author:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                        likes:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              user_id:
+                                type: integer
+                              name:
+                                type: string
   /tweets/{id}:
     delete:
       tags:
@@ -63,11 +112,11 @@ paths:
                 properties:
                   result:
                     type: boolean
-
   /tweets/{id}/likes:
     post:
       tags:
         - tweets
+        - likes
       description: Like a tweet
       parameters:
         - name: id
@@ -106,7 +155,6 @@ paths:
                 properties:
                   result:
                     type: boolean
-
   /users/me:
     get:
       tags:
@@ -153,7 +201,6 @@ paths:
                               type: integer
                             name:
                               type: string
-
   /users/{id}:
     get:
       tags:
@@ -205,7 +252,6 @@ paths:
                               type: integer
                             name:
                               type: string
-
   /users/{id}/follow:
     post:
       tags:
@@ -257,58 +303,7 @@ paths:
                 properties:
                   result:
                     type: boolean
-
-  /api/tweets:
-    get:
-      tags:
-        - tweets
-      description: Get tweet feed
-      parameters:
-        - name: api-key
-          in: header
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful retrieval
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  result:
-                    type: boolean
-                  tweets:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        content:
-                          type: string
-                        attachments:
-                          type: array
-                          items:
-                            type: string
-                        author:
-                          type: object
-                          properties:
-                            id:
-                              type: integer
-                            name:
-                              type: string
-                        likes:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              user_id:
-                                type: integer
-                              name:
-                                type: string
-    /media:
+  /medias:
     post:
       tags:
         - medias
@@ -346,4 +341,3 @@ paths:
                 properties:
                   error:
                     type: string
-
