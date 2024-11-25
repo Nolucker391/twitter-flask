@@ -2,12 +2,13 @@ import logging
 from flask import Flask, request
 from flask_restx import Api, Resource
 
-from models import Base, engine
-from schemas import tweet_data_model, tweet_response_model
-from tweet_services import get_author_id, TweetService
+from src.models import Base, engine
+from src.schemas import tweet_data_model, tweet_response_model
+from src.tweet_services import get_author_id, TweetService
+
 
 logger = logging.getLogger(__name__)
-app = Flask(__name__)
+app = Flask(__name__, static_url_path="/static")
 api = Api(app, version="1.0", title="Twitter Service API", description="API for microblogging service")
 api.models['TweetData'] = tweet_data_model
 api.models['TweetResponse'] = tweet_response_model
@@ -62,6 +63,6 @@ class TweetResource(Resource):
 if __name__ == "__main__":
     Base.metadata.create_all(engine)
     logger.info("Запуск приложения Clone Twitter...")
-    app.run(debug=True, host="0.0.0.0", port=5050)
+    app.run(debug=True, host="0.0.0.0", port=8000)
 
 

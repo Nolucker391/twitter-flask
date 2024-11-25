@@ -15,6 +15,6 @@ RUN apt-get update && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
 
-EXPOSE 5000
+EXPOSE 8000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "src.main:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "src.main:app"]
