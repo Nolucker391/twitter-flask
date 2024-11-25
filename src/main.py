@@ -8,13 +8,21 @@ from src.tweet_services import get_author_id, TweetService
 
 
 logger = logging.getLogger(__name__)
-app = Flask(__name__, static_url_path="/static")
+app = Flask(__name__, static_folder='/src/static')
 api = Api(app, version="1.0", title="Twitter Service API", description="API for microblogging service")
 api.models['TweetData'] = tweet_data_model
 api.models['TweetResponse'] = tweet_response_model
 
 tweet_service = TweetService(Base)
 
+# @app.get("/index")
+# def read_main():
+#     return FileResponse("/static/index.html")
+
+#
+# app.mount("/static", StaticFiles(directory="../static"), name="static")
+# app.mount("/js", StaticFiles(directory="../static/js"), name="js")
+# app.mount("/css", StaticFiles(directory="../static/css"), name="css")
 
 @api.route("/api/tweets")
 class TweetResource(Resource):

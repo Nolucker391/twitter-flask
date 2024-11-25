@@ -5,6 +5,9 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /src
 
+#COPY src/ /project/src/
+#COPY static/ /project/static/
+#COPY
 COPY .. .
 
 RUN apt-get update && \
@@ -16,5 +19,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 EXPOSE 8000
+
+ENV STATIC_PATH=/src/static
 
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "src.main:app"]
