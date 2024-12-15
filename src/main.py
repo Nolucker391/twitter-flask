@@ -15,14 +15,91 @@ api.models['TweetResponse'] = tweet_response_model
 
 tweet_service = TweetService(Base)
 
-# @app.get("/index")
-# def read_main():
-#     return FileResponse("/static/index.html")
 
-#
-# app.mount("/static", StaticFiles(directory="../static"), name="static")
-# app.mount("/js", StaticFiles(directory="../static/js"), name="js")
-# app.mount("/css", StaticFiles(directory="../static/css"), name="css")
+
+from src.models import Session, User
+
+def get_current_user_id():
+    api_key = request.headers.get('api-key')
+    session = Session()
+    user = session.query(User).filter_by(api_key=api_key).first()
+    session.close()
+    return user.id if user else None
+
+def get_user_by_id(user_id):
+    session = Session()
+    user = session.query(User).filter_by(id=user_id).first()
+    session.close()
+    return user
+
+@api.route("/api/users/me")
+class CurrentUserResource(Resource):
+    @api.response(200, "Success")
+    @api.doc(description="Get current user's profile")
+    def get(self):
+        """
+        Get current user's profile
+        """
+        # user_id = get_current_user_id()
+        # user_profile = tweet_service.get_current_user_profile(user_id)
+        a = {
+          "result": True,
+          "user": {
+            "id": 1,
+            "name": "test",
+            "followers": [
+              {
+                "id": 0,
+                "name": "string"
+              }
+            ],
+            "following": [
+              {
+                "id": 0,
+                "name": "string"
+              }
+            ]
+          }
+        }
+        # return {"result": True, "user": user_profile}, 200
+        return a, 200
+
+@api.route("/api/users/<int:id>")
+class UserProfileResource(Resource):
+    @api.response(200, "Success")
+    @api.doc(description="Get user profile by ID")
+    def get(self, user_id):
+        """
+        Get user profile by ID
+        """
+        # user = get_user_by_id(user_id)
+        # if user:
+        #     return {"result": True, "user": {
+        #         "id": user.id,
+        #         "name": user.name}}, 200
+        # else:
+        #     return {"result": False, "message": "User not found"}, 404
+
+        b = {
+          "result": True,
+          "user": {
+            "id": 0,
+            "name": "string",
+            "followers": [
+              {
+                "id": 0,
+                "name": "string"
+              }
+            ],
+            "following": [
+              {
+                "id": 0,
+                "name": "string"
+              }
+            ]
+          }
+        }
+        return b, 200
 
 @api.route("/api/tweets")
 class TweetResource(Resource):
