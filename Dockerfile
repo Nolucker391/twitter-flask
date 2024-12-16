@@ -20,6 +20,6 @@ RUN apt-get update && \
 
 EXPOSE 8000
 
-ENV STATIC_PATH=/src/static
+ENV STATIC_PATH=/app/src/static
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "src.main:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app.src.main:app"]

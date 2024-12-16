@@ -2,7 +2,7 @@ from sqlalchemy import (Column, Integer, String, ForeignKey,
                         Table, create_engine, MetaData)
 from sqlalchemy.orm import relationship, sessionmaker, declarative_base
 
-from src.config import (DB_USER, DB_PASSWORD, DB_HOST, DB_NAME)
+from app.src.settings.config import (DB_USER, DB_PASSWORD, DB_HOST, DB_NAME)
 
 engine = create_engine(f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}")
 metadata = MetaData()

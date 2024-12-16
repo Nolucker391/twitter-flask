@@ -1,6 +1,7 @@
-from src.models import Session, User
+from app.src.database.models import Session, User
 # import models
-from src import models
+from app.src.database import models
+
 
 def get_author_id():
     session = Session()
