@@ -2,9 +2,11 @@ from sqlalchemy import (Column, Integer, String, ForeignKey,
                         Table, create_engine, MetaData)
 from sqlalchemy.orm import relationship, sessionmaker, declarative_base
 
-from app.src.settings.config import (DB_USER, DB_PASSWORD, DB_HOST, DB_NAME)
+from app.src.settings.config import (DB_USER, DB_PASSWORD, DB_HOST, DB_NAME, DB_PORT)
 
-engine = create_engine(f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}")
+# engine = create_engine(f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+engine = create_engine(f"postgresql+psycopg2://admin:admin@localhost:5432/postgres")
+
 metadata = MetaData()
 Session = sessionmaker(bind=engine)
 Base = declarative_base()
@@ -40,7 +42,7 @@ class Media(Base):
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
-    name = Column(String(50), nullable=False)
+    name = Column(String(50), nullable=False, unique=True)
     api_key = Column(String(), nullable=True)
     authored_tweets = relationship(
         "Tweet", backref="author", foreign_keys="Tweet.author_id"
