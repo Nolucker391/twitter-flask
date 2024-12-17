@@ -18,7 +18,7 @@ class TweetResource(Resource):
         tweet_data = request.json
         author_id = get_author_id()
         tweet_id = tweet_service.create_tweet(tweet_data, author_id)
-        print(tweet_id)
+        print("aaaa", tweet_id)
         response_data = {
             "result": True,
             "tweet_id": tweet_id,
