@@ -28,6 +28,7 @@ services:
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=postgres
       - log_destination=stderr
       - logging_collector=on
     ports:

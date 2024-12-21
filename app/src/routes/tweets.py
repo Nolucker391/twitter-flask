@@ -1,10 +1,10 @@
 from flask import request
 from flask_restx import Resource
 
-from app.src.utils.tweet_services import get_author_id
+# from app.src.utils.tweet_services import get_author_id
 from app.src.schemas.schemas import tweet_data_model, tweet_response_model
 
-from app.src.routes.FlaskAppSubSettings import api, tweet_service
+from app.src.routes.FlaskAppSubSettings import api
 
 @api.route("/api/tweets")
 class TweetResource(Resource):
@@ -15,13 +15,13 @@ class TweetResource(Resource):
         """
         Create a new tweet
         """
-        tweet_data = request.json
-        author_id = get_author_id()
-        tweet_id = tweet_service.create_tweet(tweet_data, author_id)
-        print("aaaa", tweet_id)
+        api_key = request.headers.get("api-key")
+        data = request.json
+        print(api_key)
+        print(data)
         response_data = {
             "result": True,
-            "tweet_id": tweet_id,
+            "tweet_id": 1,
         }
         return response_data, 200
 

@@ -1,6 +1,9 @@
+from flask import request
 from flask_restx import Resource
 
 from app.src.routes.FlaskAppSubSettings import api
+from sqlalchemy import delete, insert, select, update
+from app.src.database.models import ApiKey, Session
 
 
 @api.route("/api/users/me")
@@ -13,6 +16,16 @@ class CurrentUserResource(Resource):
         """
         # user_id = get_current_user_id()
         # user_profile = tweet_service.get_current_user_profile(user_id)
+        api_key = request.headers.get("api-key")
+        query = select(ApiKey).where(ApiKey.api_key == api_key)
+        key = Session.execute(query)
+        key = key.scalars().one_or_none()
+
+        if key:
+            print(key.user_id)
+        else:
+            print("Не нашлось")
+
         a = {
             "result": True,
             "user": {
