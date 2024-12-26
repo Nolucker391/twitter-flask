@@ -3,7 +3,7 @@ from flask_restx import Resource
 
 from app.src.routes.FlaskAppSubSettings import api
 from sqlalchemy import delete, insert, select, update
-from app.src.database.models import ApiKey, Session
+from app.src.database.models import ApiKey, Session, User
 
 
 @api.route("/api/users/me")
@@ -16,21 +16,24 @@ class CurrentUserResource(Resource):
         """
         # user_id = get_current_user_id()
         # user_profile = tweet_service.get_current_user_profile(user_id)
-        api_key = request.headers.get("api-key")
-        query = select(ApiKey).where(ApiKey.api_key == api_key)
-        key = Session.execute(query)
-        key = key.scalars().one_or_none()
-
-        if key:
-            print(key.user_id)
-        else:
-            print("Не нашлось")
-
+        # query = select(ApiKey).where(ApiKey.api_key == api_key)
+        # key = Session.execute(query)
+        # key = key.scalars().one_or_none()
+        api_key = request.headers.get("Api-Key")
+        print(api_key)
+        session = Session()
+        query = session.query(ApiKey).filter_by(api_key=api_key).first()
+        # print(query.user_id)
+        session.close()
+            # session.query(название таблицы) - выполняет запрос к БД по таблице. filter_by - фильтрация по полю, "название таблицы" = значение
+            # query2 = session.query(User).filter_by(id=query.user_id).first()
+            # session.close()
+            # print(query2.id, query2.name)
         a = {
             "result": True,
             "user": {
                 "id": 1,
-                "name": "test",
+                "name": "almir",
                 "followers": [
                     {
                         "id": 0,
@@ -45,9 +48,8 @@ class CurrentUserResource(Resource):
                 ]
             }
         }
-        # return {"result": True, "user": user_profile}, 200
-        return a, 200
 
+        return a, 200
 
 @api.route("/api/users/<int:id>")
 class UserProfileResource(Resource):

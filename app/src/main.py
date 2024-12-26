@@ -1,5 +1,5 @@
 from app.src.routes.FlaskAppSubSettings import logger, app
-from app.src.database.models import Base, engine, Session, Image, User
+from app.src.database.models import Base, engine
 
 if __name__ == "__main__":
     Base.metadata.create_all(engine)

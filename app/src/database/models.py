@@ -1,8 +1,7 @@
 from sqlalchemy import (Column, Integer, String, ForeignKey,
                         Table, UniqueConstraint)
-from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import create_engine, MetaData
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import relationship, sessionmaker, declarative_base
 
 from app.src.settings.config import DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME
 
