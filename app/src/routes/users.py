@@ -23,33 +23,32 @@ class CurrentUserResource(Resource):
         print(api_key)
         session = Session()
         query = session.query(ApiKey).filter_by(api_key=api_key).first()
-        # print(query.user_id)
-        session.close()
-            # session.query(название таблицы) - выполняет запрос к БД по таблице. filter_by - фильтрация по полю, "название таблицы" = значение
-            # query2 = session.query(User).filter_by(id=query.user_id).first()
-            # session.close()
-            # print(query2.id, query2.name)
-        a = {
-            "result": True,
-            "user": {
-                "id": 1,
-                "name": "almir",
-                "followers": [
-                    {
-                        "id": 0,
-                        "name": "string"
-                    }
-                ],
-                "following": [
-                    {
-                        "id": 0,
-                        "name": "string"
-                    }
-                ]
-            }
-        }
+        print(query)
+        # session.query(название таблицы) - выполняет запрос к БД по таблице. filter_by - фильтрация по полю, "название таблицы" = значение
+        # query2 = session.query(User).filter_by(id=query.user_id).first()
+        # session.close()
+        # print(query2.id, query2.name)
+        # a = {
+        #     "result": True,
+        #     "user": {
+        #         "id": query2.id,
+        #         "name": query2.name,
+        #         "followers": [
+        #             {
+        #                 "id": 0,
+        #                 "name": "string"
+        #             }
+        #         ],
+        #         "following": [
+        #             {
+        #                 "id": 0,
+        #                 "name": "string"
+        #             }
+        #         ]
+        #     }
+        # }
 
-        return a, 200
+        return 200
 
 @api.route("/api/users/<int:id>")
 class UserProfileResource(Resource):
