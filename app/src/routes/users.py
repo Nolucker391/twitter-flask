@@ -1,10 +1,15 @@
-from flask import request
+from flask import request, jsonify
 from flask_restx import Resource
 
 from app.src.routes.FlaskAppSubSettings import api
 from sqlalchemy import delete, insert, select, update
 from app.src.database.models import ApiKey, Session, User
+from sqlalchemy.exc import SQLAlchemyError
 
+# session.query(название таблицы) - выполняет запрос к БД по таблице. filter_by - фильтрация по полю, "название таблицы" = значение
+        # query2 = session.query(User).filter_by(id=query.user_id).first()
+        # session.close()
+        # print(query2.id, query2.name)
 
 @api.route("/api/users/me")
 class CurrentUserResource(Resource):
@@ -14,19 +19,37 @@ class CurrentUserResource(Resource):
         """
         Get current user's profile
         """
-        # user_id = get_current_user_id()
-        # user_profile = tweet_service.get_current_user_profile(user_id)
-        # query = select(ApiKey).where(ApiKey.api_key == api_key)
-        # key = Session.execute(query)
-        # key = key.scalars().one_or_none()
-        api_key = request.headers.get("Api-Key")
-        session = Session()
-        query = session.query(ApiKey).filter_by(api_key=api_key).first()
-        print(query)
-        # session.query(название таблицы) - выполняет запрос к БД по таблице. filter_by - фильтрация по полю, "название таблицы" = значение
-        query2 = session.query(User).filter_by(id=query.user_id).first()
-        session.close()
-        print(query2.id, query2.name)
+        # api_key = request.headers.get("Api-Key")
+        # try:
+        #     if api_key:
+        #         a = {
+        #             "result": True,
+        #             "user": {
+        #                 "id": 1,
+        #                 "name": "Almir",
+        #                 "followers": [
+        #                     {
+        #                         "id": 0,
+        #                         "name": "string"
+        #                     }
+        #                 ],
+        #                 "following": [
+        #                     {
+        #                         "id": 0,
+        #                         "name": "string"
+        #                     }
+        #                 ]
+        #             }
+        #         }
+        #         api_key = request.headers.get("Api-Key")
+        #         session = Session()
+        #         query = session.query(ApiKey).filter_by(api_key=api_key).first()
+        #         query2 = session.query(User).filter_by(id=query.user_id).first()
+        #         return a, 200
+        #     else:
+        #         raise "NO"
+        # except Exception as e:
+        #     return 500
         a = {
             "result": True,
             "user": {
