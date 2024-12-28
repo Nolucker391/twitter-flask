@@ -6,10 +6,6 @@ from sqlalchemy import delete, insert, select, update
 from app.src.database.models import ApiKey, Session, User
 from sqlalchemy.exc import SQLAlchemyError
 
-# session.query(название таблицы) - выполняет запрос к БД по таблице. filter_by - фильтрация по полю, "название таблицы" = значение
-        # query2 = session.query(User).filter_by(id=query.user_id).first()
-        # session.close()
-        # print(query2.id, query2.name)
 
 @api.route("/api/users/me")
 class CurrentUserResource(Resource):
@@ -17,98 +13,95 @@ class CurrentUserResource(Resource):
     @api.doc(description="Get current user's profile")
     def get(self):
         """
-        Get current user's profile
+        Метод для выдачи информации о пользователе на главной странице.
         """
-        # api_key = request.headers.get("Api-Key")
-        # try:
-        #     if api_key:
-        #         a = {
-        #             "result": True,
-        #             "user": {
-        #                 "id": 1,
-        #                 "name": "Almir",
-        #                 "followers": [
-        #                     {
-        #                         "id": 0,
-        #                         "name": "string"
-        #                     }
-        #                 ],
-        #                 "following": [
-        #                     {
-        #                         "id": 0,
-        #                         "name": "string"
-        #                     }
-        #                 ]
-        #             }
-        #         }
-        #         api_key = request.headers.get("Api-Key")
-        #         session = Session()
-        #         query = session.query(ApiKey).filter_by(api_key=api_key).first()
-        #         query2 = session.query(User).filter_by(id=query.user_id).first()
-        #         return a, 200
-        #     else:
-        #         raise "NO"
-        # except Exception as e:
-        #     return 500
-        a = {
-            "result": True,
-            "user": {
-                "id": 1,
-                "name": "Almir",
-                "followers": [
-                    {
-                        "id": 0,
-                        "name": "string"
-                    }
-                ],
-                "following": [
-                    {
-                        "id": 0,
-                        "name": "string"
-                    }
-                ]
+        try:
+            api_key = request.headers.get("Api-Key")
+            session = Session()
+            # query = session.query(ApiKey).filter_by(api_key=api_key).first()
+            # query2 = session.query(User).filter_by(id=query.user_id).first()
+            query = session.query(User).join(ApiKey).filter(ApiKey.api_key == api_key).first()
+
+            if not query:
+                return jsonify({"error": "Пользователь с таким API не найден."}), 401
+            a = {
+                "result": True,
+                "user": {
+                    "id": query.id,
+                    "name": query.name,
+                    "followers": [],
+                    "following": []
+                }
             }
-        }
 
-        return a, 200
+            a["user"]["followers"] = [
+                {
+                    "id": f.id,
+                    "name": f.name
+                }
+                for f in query.followers
+            ]
 
-@api.route("/api/users/<int:id>")
+            a["user"]["following"] = [
+                {
+                    "id": f.id,
+                    "name": f.name
+                }
+                for f in query.following
+            ]
+
+            return a, 200
+
+        except Exception as e:
+            return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
+
+
+@api.route("/api/users/<int:user_id>")
 class UserProfileResource(Resource):
     @api.response(200, "Success")
     @api.doc(description="Get user profile by ID")
-    def get(self, user_id):
+    def get(self, user_id: int):
         """
-        Get user profile by ID
+        Метод для выдачи профили, у пользователя. .
         """
-        # user = get_user_by_id(user_id)
-        # if user:
-        #     return {"result": True, "user": {
-        #         "id": user.id,
-        #         "name": user.name}}, 200
-        # else:
-        #     return {"result": False, "message": "User not found"}, 404
 
-        b = {
-            "result": True,
-            "user": {
-                "id": 1,
-                "name": "string",
-                "followers": [
-                    {
-                        "id": 2,
-                        "name": "string"
-                    }
-                ],
-                "following": [
-                    {
-                        "id": 0,
-                        "name": "string"
-                    }
-                ]
+        try:
+            session = Session()
+            query = session.query(User).filter_by(id=user_id).first()
+
+            if not query:
+                return jsonify({"error": "Пользователь с таким ID не найден."}), 401
+            a = {
+                "result": True,
+                "user": {
+                    "id": query.id,
+                    "name": query.name,
+                    "followers": [],
+                    "following": []
+                }
             }
-        }
 
-        return b, 200
+            a["user"]["followers"] = [
+                {
+                    "id": f.id,
+                    "name": f.name
+                }
+                for f in query.followers
+            ]
+
+            a["user"]["following"] = [
+                {
+                    "id": f.id,
+                    "name": f.name
+                }
+                for f in query.following
+            ]
+
+            return a, 200
+
+        except Exception as e:
+            return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
+
 
 @api.route("/api/users/<int:id>/follow")
 class FollowUserResource(Resource):
@@ -118,8 +111,7 @@ class FollowUserResource(Resource):
         """
         Follow a user
         """
-        # follower_id = get_current_user_id()
-        # tweet_service.follow_user(id, follower_id)
+
         return {"result": True}, 200
 
     @api.response(200, "Success")

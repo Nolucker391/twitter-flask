@@ -1,55 +1,65 @@
-# from flask import request
-# from flask_restx import Resource
-#
-# # from app.src.utils.tweet_services import get_author_id
-# from app.src.schemas.schemas import tweet_data_model, tweet_response_model
-#
-# from app.src.routes.FlaskAppSubSettings import api
-#
-# @api.route("/api/tweets")
-# class TweetResource(Resource):
-#     @api.expect(tweet_data_model, validate=True)
-#     @api.response(200, "Success", tweet_response_model)
-#     @api.doc(description="Create a new tweet")
-#     def post(self):
-#         """
-#         Create a new tweet
-#         """
-#         api_key = request.headers.get("api-key")
-#         data = request.json
-#         print(api_key)
-#         print(data)
-#         response_data = {
-#             "result": True,
-#             "tweet_id": 1,
-#         }
-#         return response_data, 200
-#
-#     def get(self):
-#         response_data = {
-#             "result": True,
-#             "tweets": [
-#                 {
-#                     "id": 0,
-#                     "content": "string",
-#                     "attachments": [
-#                         "string"
-#                     ],
-#                     "author": {
-#                         "id": 0,
-#                         "name": "string"
-#                     },
-#                     "likes": [
-#                         {
-#                             "user_id": 0,
-#                             "name": "string"
-#                         }
-#                     ]
-#                 }
-#             ]
-#         }
-#         return response_data, 200
-#
+from flask import request
+from flask_restx import Resource
+from sqlalchemy import insert, select, Sequence
+
+from app.src.database.models import User, ApiKey, Session, Tweets
+# from app.src.utils.tweet_services import get_author_id
+from app.src.schemas.schemas import tweet_data_model, tweet_response_model
+
+from app.src.routes.FlaskAppSubSettings import api
+
+@api.route("/api/tweets")
+class TweetResource(Resource):
+    @api.expect(tweet_data_model, validate=True)
+    @api.response(200, "Success", tweet_response_model)
+    @api.doc(description="Create a new tweet")
+    def post(self):
+        """
+        Create a new tweet
+        """
+        api_key = request.headers.get("api-key")
+        session = Session()
+        query = session.query(User).join(ApiKey).filter(ApiKey.api_key == api_key).first()
+        tweet_data = request.json
+        query2 = session.execute(insert(Tweets).values(author_id=query.id, content=tweet_data.get("tweet_data")).returning(Tweets.id))
+        session.commit()
+        tweet_id = query2.scalar_one()
+        response_data = {
+            "result": True,
+            "tweet_id": tweet_id,
+        }
+        return response_data, 200
+
+    from typing import Sequence
+    def get(self):
+        session = Session()
+        query = session.execute(select(Tweets))
+        tweets = query.scalars().all()
+        print(tweets)
+        response_data = {
+            "result": True,
+            "tweets": [
+                {
+                    "id": tweets["id"],
+                    "content": tweets["content"],
+                    "attachments": [
+                        "string"
+                    ],
+                    "author": {
+                        "id": tweets["author_id"],
+                        "name": "string"
+                    },
+                    "likes": [
+                        {
+                            "user_id": 0,
+                            "name": "string"
+                        }
+                    ]
+                }
+            ]
+        }
+        return response_data, 200
+
 #
 # @api.route("/api/tweets/<int:id>")
 # class TweetIdResource(Resource):
