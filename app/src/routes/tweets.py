@@ -1,8 +1,8 @@
 from flask import request
 from flask_restx import Resource
-from sqlalchemy import insert, select, Sequence
+from sqlalchemy import insert, select, Sequence, update
 
-from app.src.database.models import User, ApiKey, Session, Tweets
+from app.src.database.models import User, ApiKey, Session, Tweets, Image
 # from app.src.utils.tweet_services import get_author_id
 from app.src.schemas.schemas import tweet_data_model, tweet_response_model
 
@@ -23,7 +23,12 @@ class TweetResource(Resource):
         tweet_data = request.json
         query2 = session.execute(insert(Tweets).values(author_id=query.id, content=tweet_data.get("tweet_data")).returning(Tweets.id))
         session.commit()
-        tweet_id = query2.scalar_one()
+        tweet_id = query2.scalar_one_or_none()
+        media_ids = tweet_data.get("tweet_media_ids")
+        if media_ids:
+            for m_id in media_ids:
+                session.execute(update(Image)).where(Image.id == m_id).values(tweet_id=tweet_id)
+                session.commit()
         response_data = {
             "result": True,
             "tweet_id": tweet_id,
@@ -33,20 +38,19 @@ class TweetResource(Resource):
     from typing import Sequence
     def get(self):
         session = Session()
-        query = session.execute(select(Tweets))
-        tweets = query.scalars().all()
-        print(tweets)
+        query_tweets = session.execute(select(Tweets)).scalars().all()
+
         response_data = {
             "result": True,
             "tweets": [
                 {
-                    "id": tweets["id"],
-                    "content": tweets["content"],
+                    "id": tweet.id,
+                    "content": tweet.content,
                     "attachments": [
                         "string"
                     ],
                     "author": {
-                        "id": tweets["author_id"],
+                        "id": tweet.author_id,
                         "name": "string"
                     },
                     "likes": [
@@ -55,7 +59,7 @@ class TweetResource(Resource):
                             "name": "string"
                         }
                     ]
-                }
+                } for tweet in query_tweets
             ]
         }
         return response_data, 200
