@@ -26,9 +26,7 @@ class TweetResource(Resource):
         tweet_id = query2.scalar_one_or_none()
         media_ids = tweet_data.get("tweet_media_ids")
         if media_ids:
-            print(media_ids)
             for m_id in media_ids:
-                print(m_id)
                 session.execute(update(Image).where(Image.id == m_id).values(tweet_id=tweet_id))
                 session.commit()
         response_data = {
@@ -41,6 +39,7 @@ class TweetResource(Resource):
     def get(self):
         session = Session()
         query_tweets = session.execute(select(Tweets)).scalars().all()
+        # test_Unknown.jpeg
 
         response_data = {
             "result": True,
@@ -49,7 +48,7 @@ class TweetResource(Resource):
                     "id": tweet.id,
                     "content": tweet.content,
                     "attachments": [
-                        "string"
+                        f"static/medias/{link.filename}" for link in tweet.attachments
                     ],
                     "author": {
                         "id": tweet.author_id,
@@ -64,6 +63,7 @@ class TweetResource(Resource):
                 } for tweet in query_tweets
             ]
         }
+
         return response_data, 200
 
 #

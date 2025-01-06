@@ -34,24 +34,20 @@ def add_image_on_database(filename, session):
 
     return image_id
 
-def save_image(out_file_path, file):
-    os.makedirs(os.path.dirname(out_file_path), exist_ok=True)
-    filename = file.filename.replace('/', '_')
-    file_path = os.path.join(out_file_path, filename)
-    print(f"Saving file to: {file_path}")  # Добавьте отладочный вывод
-
-    try:
-        os.makedirs(os.path.dirname(file_path), exist_ok=True) # Создаём директорию, если её нет
-        if not os.path.exists(out_file_path):
-            print(f"Directory {out_file_path} does not exist!")
-
-        file.save(file_path)
-        print(f"File saved successfully: {file_path}")
-        return True
-    except Exception as e:
-        print(f"Error saving file: {str(e)}")
-        return False
-
+# def save_image(out_file_path, file):
+#     filename = file.filename.replace('/', '_')
+#     print("qqq", filename)
+#     file_path = os.path.join(out_file_path, filename)
+#     print(f"Saving file to: {file_path}")  # Добавьте отладочный вывод
+#
+#     os.makedirs(os.path.dirname(file_path), exist_ok=True) # Создаём директорию, если её нет
+#
+#     if not os.path.exists(out_file_path):
+#         print(f"Directory {out_file_path} does not exist!")
+#
+#     file.save(file_path)
+#     print(f"File saved successfully: {file_path}")
+#     return True
 
 @api.route("/api/medias")
 class MediaUploadResource(Resource):
@@ -70,14 +66,52 @@ class MediaUploadResource(Resource):
         print(f"mediafile: {media_file}\nfilename: {filename}")
         if not image:
             image_id = add_image_on_database(filename=filename, session=session)
-            # out_file_path = f"../src/app/medias/{api_key}_{media_file.filename}"
-            # out_file_path = f"../twitter-flask/app/medias/{api_key}_{media_file.filename}"
+            # out_file_path = f"../src/app/static/medias/{api_key}_{media_file.filename}" # путь в контейнере
+            out_file_path = f"../src/app/static/medias/" # путь в контейнере
+            fl = f"{api_key}_{media_file.filename}"
+            # filename = media_file.filename.replace('/', '_')
+            print("qqq", filename)
+            file_path = os.path.join(out_file_path, filename)
+            print(f"Saving file to: {file_path}")
 
-            out_file_path = os.path.join(app.root_path, 'medias', api_key)
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-            save_image(out_file_path, file=media_file)
+            if not os.path.exists(out_file_path):
+                print(f"Directory {out_file_path} does not exist!")
+
+            media_file.save(file_path)
+            print(f"File saved successfully: {file_path}")
 
             return {"result": True, "media_id": image_id}
 
         return {"result": True, "media_id": image.id}
+
+
+# @api.route("/api/medias")
+# class MediaUploadResource(Resource):
+#     @api.doc(description="Load media files")
+#     def post(self):
+#         """
+#         Load media files
+#         """
+#         api_key = request.headers.get("api-key")
+#         session = Session()
+#         # query = session.query(User).join(ApiKey).filter(ApiKey.api_key == api_key).first()
+#         media_file = request.files["file"]
+#         filename = f"{api_key}_{media_file.filename}"
+#
+#         image = get_image(filename=filename, session=session)
+#         print(f"mediafile: {media_file}\nfilename: {filename}")
+#         if not image:
+#             image_id = add_image_on_database(filename=filename, session=session)
+#             # out_file_path = f"../src/app/medias/{api_key}_{media_file.filename}"
+#             out_file_path = f"../twitter-flask/app/medias/{api_key}_{media_file.filename}"
+#
+#             # out_file_path = os.path.join(app.root_path, 'medias', api_key)
+#
+#             save_image(out_file_path, file=media_file)
+#
+#             return {"result": True, "media_id": image_id}
+#
+#         return {"result": True, "media_id": image.id}
 

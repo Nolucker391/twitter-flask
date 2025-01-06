@@ -8,7 +8,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - .:/app/src
+      - .:/src # было app/src
     environment:
       FLASK_APP: main.py
       FLASK_ENV: production
@@ -36,6 +36,6 @@ services:
     volumes:
       - ./app/database/:/var/lib/postgresql/data
 
-volumes:
-  medias: {}
+#volumes:
+#  medias: {}
 
