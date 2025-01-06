@@ -35,3 +35,7 @@ services:
       - "5432:5432"
     volumes:
       - ./app/database/:/var/lib/postgresql/data
+
+volumes:
+  medias: {}
+

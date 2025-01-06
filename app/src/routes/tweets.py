@@ -26,8 +26,10 @@ class TweetResource(Resource):
         tweet_id = query2.scalar_one_or_none()
         media_ids = tweet_data.get("tweet_media_ids")
         if media_ids:
+            print(media_ids)
             for m_id in media_ids:
-                session.execute(update(Image)).where(Image.id == m_id).values(tweet_id=tweet_id)
+                print(m_id)
+                session.execute(update(Image).where(Image.id == m_id).values(tweet_id=tweet_id))
                 session.commit()
         response_data = {
             "result": True,
