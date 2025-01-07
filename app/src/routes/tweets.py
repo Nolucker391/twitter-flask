@@ -52,7 +52,7 @@ class TweetResource(Resource):
                     ],
                     "author": {
                         "id": tweet.author_id,
-                        "name": "string"
+                        "name": "sting"
                     },
                     "likes": [
                         {

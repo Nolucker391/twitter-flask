@@ -12,6 +12,7 @@ services:
     environment:
       FLASK_APP: main.py
       FLASK_ENV: production
+#    command: [ "python", "/app/src/database/insert_data.py" ]
 
   nginx:
     image: nginx:latest
