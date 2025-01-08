@@ -1,12 +1,11 @@
 from flask import request
 from flask_restx import Resource
-from sqlalchemy import insert, select, Sequence, update
 
-from app.src.database.models import User, ApiKey, Session, Tweets, Image
-# from app.src.utils.tweet_services import get_author_id
-from app.src.schemas.schemas import tweet_data_model, tweet_response_model
+from app.src.routes.FlaskAppSubSettings import api, logger
+from app.src.database.models import Session
+from app.src.schemas.schemas import tweet_data_model, tweet_response_model, tweet_get_response_model
+from app.src.utils.tweet_services import TweetQueriesDatabase, reformatting_data
 
-from app.src.routes.FlaskAppSubSettings import api
 
 @api.route("/api/tweets")
 class TweetResource(Resource):
@@ -14,67 +13,84 @@ class TweetResource(Resource):
     @api.response(200, "Success", tweet_response_model)
     @api.doc(description="Create a new tweet")
     def post(self):
-        """
-        Create a new tweet
-        """
-        api_key = request.headers.get("api-key")
+        """ Функция-обработчик, для создания нового твита. """
         session = Session()
-        query = session.query(User).join(ApiKey).filter(ApiKey.api_key == api_key).first()
-        tweet_data = request.json
-        query2 = session.execute(insert(Tweets).values(author_id=query.id, content=tweet_data.get("tweet_data")).returning(Tweets.id))
-        session.commit()
-        tweet_id = query2.scalar_one_or_none()
-        media_ids = tweet_data.get("tweet_media_ids")
-        if media_ids:
-            for m_id in media_ids:
-                session.execute(update(Image).where(Image.id == m_id).values(tweet_id=tweet_id))
-                session.commit()
-        response_data = {
-            "result": True,
-            "tweet_id": tweet_id,
-        }
-        return response_data, 200
+        db_queries = TweetQueriesDatabase(session)
 
-    from typing import Sequence
+        try:
+            tweet_data = request.json
+            api_key = request.headers.get("api-key")
+
+            tweet_id = db_queries.add_tweet(api_key=api_key, tweet_data=tweet_data)
+
+            return {"result": True, "tweet_id": tweet_id}, 200
+
+        except Exception as e:
+            logger.error(f"Error in POST /api/tweets: {e}")
+            return {"result": False, "message": "Internal server error"}, 413
+
+        finally:
+            try:
+                db_queries.close_session()
+            except Exception as close_error:
+                logger.error(f"Error closing session: {close_error}")
+
+    @api.response(200, "Success", tweet_get_response_model)
+    @api.doc(description="Show all tweets.")
     def get(self):
+        """ Функция-обработчик, для отображения всех твитов на странице. """
         session = Session()
-        query_tweets = session.execute(select(Tweets)).scalars().all()
-        # test_Unknown.jpeg
+        db_queries = TweetQueriesDatabase(session)
 
-        response_data = {
-            "result": True,
-            "tweets": [
-                {
-                    "id": tweet.id,
-                    "content": tweet.content,
-                    "attachments": [
-                        f"static/medias/{link.filename}" for link in tweet.attachments
-                    ],
-                    "author": {
-                        "id": tweet.author_id,
-                        "name": "sting"
-                    },
-                    "likes": [
-                        {
-                            "user_id": 0,
-                            "name": "string"
-                        }
-                    ]
-                } for tweet in query_tweets
-            ]
-        }
+        try:
+            tweets = db_queries.get_tweets()
 
-        return response_data, 200
+            response_data = reformatting_data(tweets)
 
-#
-# @api.route("/api/tweets/<int:id>")
-# class TweetIdResource(Resource):
-#     @api.response(200, "Success")
-#     @api.doc(description="Delete a tweet")
-#     def delete(self, id):
-#         """
-#         Delete a tweet
-#         """
-#         # author_id = get_current_user_id()
-#         # tweet_service.delete_tweet(id, author_id)
-#         return {"result": True}, 200
+            return response_data, 200
+
+        except Exception as e:
+            logger.error(f"Error in GET /api/medias: {e}")
+            return {"result": False, "message": "Internal server error"}, 500
+
+        finally:
+            try:
+                db_queries.close_session()
+            except Exception as close_error:
+                logger.error(f"Error closing session: {close_error}")
+
+
+@api.route("/api/tweets/<int:tweet_id>")
+class TweetIdResource(Resource):
+    @api.response(200, "Success")
+    @api.doc(description="Delete a tweet")
+    def delete(self, tweet_id):
+        """ Функция-обработчик, для удаления твита. """
+        session = Session()
+        db_queries = TweetQueriesDatabase(session)
+
+        try:
+            api_key = request.headers.get("api-key")
+
+            if not api_key:
+                logger.error(f"DELETE Запрос на /tweets{tweet_id} не обработан. Пользователь с ключом <{api_key}> не найден.")
+                return {"result": False, "message": f"User with api_key{api_key} not found."}, 413
+
+            result, status_code = db_queries.delete_tweet(api_key=api_key, tweet_id=tweet_id)
+
+            return result, status_code
+
+        except Exception as e:
+            logger.error(f"DELETE запрос на /tweets/{id}. Детали: {str(e.__dict__['orig'])}")
+            return {"result": False}, 413
+
+        finally:
+            try:
+                db_queries.close_session()
+            except Exception as close_error:
+                logger.error(f"Error closing session: {close_error}")
+
+
+
+
+
