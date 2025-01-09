@@ -46,7 +46,10 @@ class QueriesDatabase:
             return None
 
     def add_image_on_database(self, filename):
-        """ Функция, для добавления в БД - изображения к твиту. """
+        """
+        Функция, для добавления в БД - изображения к твиту.
+        Загружаемый файл не должно превышать: 1МБ
+        """
         try:
             query = insert(Image).values(filename=filename).returning(Image.id)
             result = self.session.execute(query)

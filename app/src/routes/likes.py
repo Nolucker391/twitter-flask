@@ -1,41 +1,48 @@
 from flask import request
 from flask_restx import Resource
-from sqlalchemy import insert, delete
 
 from app.src.routes.FlaskAppSubSettings import api, logger
-from app.src.database.models import Session, User, ApiKey, Tweets, Like
-from app.src.schemas.schemas import tweet_data_model, tweet_response_model, tweet_get_response_model
-from app.src.utils.tweet_services import TweetQueriesDatabase, reformatting_data
+from app.src.utils.like_services import QueriesDatabase
+from app.src.database.models import Session
 
 
 @api.route("/api/tweets/<int:tweet_id>/likes")
 class LikeTweetResource(Resource):
+    def process_like(self, tweet_id, query_method):
+        session = Session()
+        db_queries = QueriesDatabase(session)
+
+        try:
+            api_key: str = request.headers.get("api-key")
+
+            if not api_key:
+                logger.error(f"DELETE Запрос на /tweets/{tweet_id}/like не обработан. Пользователь с ключом <{api_key}> не найден.")
+                return {"result": False, "message": f"User with api_key{api_key} not found."}, 413
+
+            result, status_code = db_queries.add_delete_like(api_key=api_key, tweet_id=tweet_id, query_method=query_method)
+
+            return result, status_code
+
+        except Exception as e:
+            logger.error(f"Error in POST /api/tweets/<int:tweet_id>/likes: {e}")
+            return {"result": False, "message": "Internal server error"}, 413
+
+        finally:
+            try:
+                db_queries.close_session()
+            except Exception as close_error:
+                logger.error(f"Error closing session: {close_error}")
+
     @api.response(200, "Success")
     @api.doc(description="Like a tweet")
     def post(self, tweet_id):
         """ Функция-обработчик, чтобы поставить отметку <Нравиться> на твит. """
-        session = Session()
-        api_key: str = request.headers.get("api-key")
-        user = session.query(User).join(ApiKey).filter(ApiKey.api_key == api_key).first()
-        tweet = session.query(Tweets).filter(Tweets.id == tweet_id).first()
+        return self.process_like(tweet_id, query_method="add")
 
-        session.execute(insert(Like).values(user_id=user.id, tweet_id=tweet_id))
-        session.commit()
-
-        # памятка: likes.py красиво оформить, БД заплнение добавить побольше данных, профиль юзера сделать
-
-        return {"result": True}, 200
 
     @api.response(200, "Success")
     @api.doc(description="Unlike a tweet")
     def delete(self, tweet_id):
         """ Функция-обработчик, для удаления отметки <Нравиться> с твита. """
-        session = Session()
-        api_key: str = request.headers.get("api-key")
-        user = session.query(User).join(ApiKey).filter(ApiKey.api_key == api_key).first()
-        tweet = session.query(Tweets).filter(Tweets.id == tweet_id).first()
+        return self.process_like(tweet_id, query_method="delete")
 
-        session.execute(delete(Like).filter(Like.tweet_id == tweet_id, Like.user_id == user.id))
-        session.commit()
-
-        return {"result": True}, 200

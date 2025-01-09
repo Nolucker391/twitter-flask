@@ -103,23 +103,28 @@ class UserProfileResource(Resource):
             return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
 
-@api.route("/api/users/<int:id>/follow")
+
+@api.route("/api/users/<int:user_id>/follow")
 class FollowUserResource(Resource):
+    def follow_process(self, user_id, query_method):
+        session = Session()
+        # db_queries = QueriesDatabase(session)
+        pass
+
     @api.response(200, "Success")
     @api.doc(description="Follow a user")
-    def post(self, id):
+    def post(self, user_id):
         """
         Follow a user
         """
 
-        return {"result": True}, 200
+        return self.follow_process(user_id, query_method="follow")
 
     @api.response(200, "Success")
     @api.doc(description="Unfollow a user")
-    def delete(self, id):
+    def delete(self, user_id):
         """
         Unfollow a user
         """
-        # follower_id = get_current_user_id()
-        # tweet_service.unfollow_user(id, follower_id)
-        return {"result": True}, 200
+
+        return self.follow_process(user_id, query_method="unfollow")
