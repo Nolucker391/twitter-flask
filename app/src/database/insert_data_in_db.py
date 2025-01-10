@@ -2,7 +2,7 @@
 import argparse
 
 from sqlalchemy import insert
-from models import User, ApiKey, Session, Tweets, Image
+from models import User, ApiKey, Session, Tweets, Image, Like
 
 
 users_data = [
@@ -30,6 +30,7 @@ tweets_data = [
     {"author_id": 4, "content": "I built a beast, a powerful gaming PC with the characteristics: RTX 4090, i9-14900K, 64GB Ram and M2 SSD for 2TB.💻"},
     {"author_id": 5, "content": "Come on 2025. The presidential position has been waiting for me. Good Luck."},
     {"author_id": 6, "content": "On CHILL, on Positive - I like the world... Bye!🤳"},
+    {"author_id": 4, "content": "▁ ▂ ▄ ▅ ▆ ▇ █ 🄰🄳🅅🄴🅁🅃🄸🅂🄴🄼🄴🄽🅃 █ ▇ ▆ ▅ ▄ ▂ ▁"},
 ]
 
 tweets_medias = [
@@ -40,9 +41,10 @@ tweets_medias = [
     {"filename": 'trump-mewing-sigma.gif', "tweet_id": 5},
     {"filename": 'chill-guy-my-new-character.gif', "tweet_id": 6},
     {"filename": 'litvin.gif', "tweet_id": 6},
+    {"filename": 'advertisement.gif', "tweet_id": 7},
 ]
 
-likes_data = {
+likes_data = [
     {"user_id": 1, "tweet_id": 2},
     {"user_id": 1, "tweet_id": 3},
     {"user_id": 2, "tweet_id": 2},
@@ -55,7 +57,7 @@ likes_data = {
     {"user_id": 5, "tweet_id": 5},
     {"user_id": 5, "tweet_id": 3},
     {"user_id": 6, "tweet_id": 2},
-}
+]
 
 def insert_data():
     session = Session()
@@ -63,6 +65,7 @@ def insert_data():
     session.execute(insert(ApiKey), users_api_data)
     session.execute(insert(Tweets), tweets_data)
     session.execute(insert(Image), tweets_medias)
+    session.execute(insert(Like), likes_data)
     session.commit()  # Фиксируем изменения
 
 

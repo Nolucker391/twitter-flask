@@ -24,7 +24,7 @@ class MediaUploadResource(Resource):
             media_file = request.files["file"]
 
             if not media_file or not allowed_file(media_file.filename):
-                return {"result": False, "message": "Invalid file format or no file provided"}, 413
+                return {"result": False, "message": "Invalid file format or no file provided"}, 400
 
             image = db_queries.get_image(filename=media_file.filename)
 

@@ -1,9 +1,9 @@
 from flask import request, jsonify
 from flask_restx import Resource
 
-from app.src.routes.FlaskAppSubSettings import api
+from app.src.routes.FlaskAppSubSettings import api, logger
 from sqlalchemy import delete, insert, select, update
-from app.src.database.models import ApiKey, Session, User
+from app.src.database.models import ApiKey, Session, User, user_following
 from sqlalchemy.exc import SQLAlchemyError
 
 
@@ -104,27 +104,71 @@ class UserProfileResource(Resource):
 
 
 
-@api.route("/api/users/<int:user_id>/follow")
+@api.route("/api/users/<int:following_id>/follow")
 class FollowUserResource(Resource):
-    def follow_process(self, user_id, query_method):
+    def follow_process(self, following_id, query_method):
         session = Session()
         # db_queries = QueriesDatabase(session)
-        pass
+        try:
+            api_key: str = request.headers.get("api-key")
+            user = session.query(User).join(ApiKey).filter(ApiKey.api_key == api_key).first()
+
+            if not api_key:
+                logger.error(f"DELETE Запрос на /users/{user.id}/follow не обработан. Пользователь с ключом <{api_key}> не найден.")
+                return {"result": False, "message": f"User with api_key{api_key} not found."}, 413
+
+            select_user_query = select(User).where(User.id == following_id)
+            user_to_follow = session.execute(select_user_query)
+            user_to_follow = user_to_follow.scalar_one_or_none()
+
+            if user_to_follow:
+                exist_follow = session.execute(
+                    select(user_following).filter(
+                        user_following.c.user_id == user.id,
+                        user_following.c.following_id == following_id,
+                    )
+                )
+                exist_follow = exist_follow.scalars().one_or_none()
+
+                if exist_follow:
+                    stmt = delete(user_following).filter(
+                        user_following.c.user_id == user.id,
+                        user_following.c.following_id == following_id,
+                    )
+                    session.execute(stmt)
+                    session.commit()
+
+                    return {"result": True}
+                    # return {
+                    #     "result": False,
+                    #     "error_message": f"Пользователь с id={user.id} уже подписан на пользователя с id={following_id}",
+                    #     "error_type": "FollowExist",
+                    # }
+
+                else:
+                    stmt = insert(user_following).values(user_id=user.id, following_id=following_id)
+                    session.execute(stmt)
+                    session.commit()
+
+                    return {"result": True}
+
+        except Exception as e:
+            pass
 
     @api.response(200, "Success")
     @api.doc(description="Follow a user")
-    def post(self, user_id):
+    def post(self, following_id):
         """
         Follow a user
         """
 
-        return self.follow_process(user_id, query_method="follow")
+        return self.follow_process(following_id, query_method="follow")
 
     @api.response(200, "Success")
     @api.doc(description="Unfollow a user")
-    def delete(self, user_id):
+    def delete(self, following_id):
         """
         Unfollow a user
         """
 
-        return self.follow_process(user_id, query_method="unfollow")
+        return self.follow_process(following_id, query_method="unfollow")
