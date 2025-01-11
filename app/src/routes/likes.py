@@ -40,7 +40,7 @@ class LikeTweetResource(Resource):
         return self.process_like(tweet_id, query_method="add")
 
 
-    @api.response(200, "Success")
+    @api.response(200, "Success", )
     @api.doc(description="Unlike a tweet")
     def delete(self, tweet_id):
         """ Функция-обработчик, для удаления отметки <Нравиться> с твита. """

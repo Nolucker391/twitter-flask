@@ -50,7 +50,7 @@ class TweetResource(Resource):
             return response_data, 200
 
         except Exception as e:
-            logger.error(f"Error in GET /api/medias: {e}")
+            logger.error(f"Error in GET /api/tweets: {e}")
             return {"result": False, "message": "Internal server error"}, 500
 
         finally:

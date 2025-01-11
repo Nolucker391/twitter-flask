@@ -1,6 +1,19 @@
 #version: '3'
 
 services:
+  test_db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=test_user
+      - POSTGRES_PASSWORD=test_password
+      - POSTGRES_DB=test_db
+    ports:
+      - '5433:5432'
+    volumes:
+      - ./test_database/:/var/lib/postgresql/test_data
+    networks:
+      - web
+
   web:
     build:
       context: .
@@ -12,7 +25,10 @@ services:
     environment:
       FLASK_APP: main.py
       FLASK_ENV: production
-#    command: [ "python", "/app/src/database/insert_data.py" ]
+    depends_on:
+      - nginx
+    networks:
+      - web
 
   nginx:
     image: nginx:latest
@@ -22,6 +38,9 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro # монтируется как только для чтения.
       - ./app/static/:/usr/share/nginx/html/ # монтируются в контейнер.
     depends_on:
+      - postgres
+      - test_db
+    networks:
       - web
 
   postgres:
@@ -34,8 +53,16 @@ services:
       - logging_collector=on
     ports:
       - "5432:5432"
+    depends_on:
+      - test_db
+    networks:
+      - web
     volumes:
       - ./app/database/:/var/lib/postgresql/data
+
+networks:
+  web:  # Объявляем сеть
+    driver: bridge
 
 #volumes:
 #  medias: {}

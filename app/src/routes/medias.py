@@ -3,7 +3,7 @@ from flask_restx import Resource
 
 from app.src.routes.FlaskAppSubSettings import api, logger
 from app.src.database.models import Session
-from app.src.schemas.schemas import media_upload_model, media_response_model
+from app.src.schemas.schemas import media_response_model, media_upload_model
 from app.src.utils.media_services import allowed_file, QueriesDatabase, save_image_on_system
 
 
