@@ -10,7 +10,7 @@ services:
     ports:
       - '5433:5432'
     volumes:
-      - ./test_database/:/var/lib/postgresql/test_data
+      - ./test_database/:/var/lib/postgresql/data
     networks:
       - web
 

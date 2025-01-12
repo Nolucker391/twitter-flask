@@ -1,71 +1,61 @@
 import pytest
-import os
-import sys
-from flask import Flask
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
+from app.src.database.models import User, Tweets, ApiKey, Like, Image
 
-from app.src.database.models import Base
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-
-DB_HOST_TEST = "localhost"
-DB_PORT_TEST = 5433
-DB_NAME_TEST = "test_db"
-DB_USER_TEST = "test_user"
-DB_PASS_TEST = "test_password"
-
-TEST_DATABASE_URI = f"postgresql+psycopg2://{DB_USER_TEST}:{DB_PASS_TEST}@{DB_HOST_TEST}:{DB_PORT_TEST}/{DB_NAME_TEST}"
-test_engine = create_engine(TEST_DATABASE_URI, echo=False)
-TestSession = scoped_session(sessionmaker(bind=test_engine))
-
-
-@pytest.fixture(scope="session")
-def app():
-    """Создание Flask-приложения для тестов."""
-    app = Flask(__name__)
-    app.config["TESTING"] = True
-    app.config["SQLALCHEMY_DATABASE_URI"] = TEST_DATABASE_URI
-    return app
-
-@pytest.fixture(scope="session")
-def test_db():
-    """Создание схемы тестовой базы данных перед тестами."""
-    Base.metadata.create_all(test_engine)
-    yield
-    Base.metadata.drop_all(test_engine)
+data = {
+    "names": ["John", "Smith", "Stive"],
+    "api-keys": ["dk5", 123, 5666],
+    "filename": ["test_path.png", "test_path.jpg"],
+    "content": ["Hello world!", "test message."]
+}
 
 @pytest.fixture(scope="function")
-def db_session(test_db):
-    """Фикстура для предоставления сессии базы данных."""
-    session = TestSession()
-
-    try:
-        yield session
-    finally:
-        session.rollback()
-        session.close()
-
-from app.src.database.models import Base, User
-from app.src.utils.user_services import QueriesDatabase
-
-def test_get_user_profile(db_session):
-    Base.metadata.create_all(test_engine)
-
-    # Создание тестового пользователя
-    user = User(id=1, name="test_user")
+def test_user_data(db_session):
+    """Тест для создания пользователя в БД."""
+    user = User(name=data.get("names")[0])
     db_session.add(user)
     db_session.commit()
-#
-#     with app.test_client() as client:
-#         db_queries = QueriesDatabase(db_session)
-#
-#         result = db_queries.get_user_profile(user_id=1)
-#         assert result["result"] is True
-#         assert result["user"]["name"] == "test_user"
-#
-#         # Запрос несуществующего пользователя
-#         result = db_queries.get_user_profile(user_id=999)
-#         assert result[1] == 401
+
+    api_key = ApiKey(user_id=user.id, api_key=data.get("api-keys")[0])
+    user.api_key.append(api_key)
+    db_session.commit()
+
+    return user
+
+@pytest.fixture(scope="function")
+def test_tweet_data(db_session, test_user_data):
+    """Тест для создания твита в БД."""
+
+    tweet_content = Tweets(author_id=test_user_data.id, content=data.get("content")[0])
+    db_session.add(tweet_content)
+    db_session.commit()
+
+    return tweet_content
+
+@pytest.fixture(scope="function")
+def test_tweet_attachments(db_session, test_tweet_data, test_user_data):
+    """Тест для добавления всех вложений."""
+
+    tweet_likes = Like(user_id=test_user_data.id, tweet_id=test_tweet_data.id)
+    media_tweet = Image(filename=data.get("filename")[0], tweet_id=test_tweet_data.id)
+
+    test_tweet_data.likes_by_users.append(tweet_likes)
+    test_tweet_data.attachments.append(media_tweet)
+    db_session.commit()
+
+
+def test_all_parameters_on_database(db_session, test_tweet_data, test_user_data, test_tweet_attachments):
+    tweet = db_session.query(Tweets).filter_by(author_id=test_user_data.id).first()
+
+    assert tweet is not None
+    assert tweet.author.name == data.get("names")[0]
+    assert tweet.content == data.get("content")[0]
+    assert tweet.author_id == test_user_data.id
+
+    for likes in tweet.likes_by_users:
+        assert likes.user_id == test_user_data.id
+        assert likes.tweet_id == test_tweet_data.id
+
+    for media in tweet.attachments:
+        assert media.filename == data.get("filename")[0]
+        assert media.tweet_id == test_tweet_data.id
