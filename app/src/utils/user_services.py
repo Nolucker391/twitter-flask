@@ -58,7 +58,7 @@ class QueriesDatabase:
 
         try:
             if not query:
-                return jsonify({"error": "Пользователь с таким API не найден."}), 401
+                return {"error": "Пользователь с таким API не найден."}, 401
 
             return formatted_data_user(query)
 
