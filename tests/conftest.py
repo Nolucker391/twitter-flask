@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from alembic.config import Config
 from alembic import command
 
+from app.src.database.models import Base
 
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 # export PYTHONPATH=../twitter-flask/:$PYTHONPATH
@@ -70,8 +71,8 @@ def test_db():
     apply_migrations(TEST_DATABASE_URI)
     yield
     print("Миграции применены и база готова для тестов")
-    # # После тестов очищаем базу
-    # Base.metadata.drop_all(bind=test_engine)
+    # После тестов очищаем базу
+    Base.metadata.drop_all(bind=test_engine)
 
 @pytest.fixture(scope="function")
 def db_session(test_db):

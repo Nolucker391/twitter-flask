@@ -25,6 +25,7 @@ services:
     environment:
       FLASK_APP: main.py
       FLASK_ENV: production
+      ENV: docker
     depends_on:
       - nginx
     networks:
