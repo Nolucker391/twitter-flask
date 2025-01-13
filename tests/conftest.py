@@ -3,6 +3,7 @@ import subprocess
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
+
 from alembic.config import Config
 from alembic import command
 
@@ -16,10 +17,16 @@ DB_NAME_TEST = "test_db"
 DB_USER_TEST = "test_user"
 DB_PASS_TEST = "test_password"
 
+data = {
+    "names": ["John", "Smith", "Stive"],
+    "api-keys": ["dk5", 123, 5666],
+    "filename": ["test_path.png", "test_path.jpg"],
+    "content": ["Hello world!", "test message."]
+}
+
 TEST_DATABASE_URI = f"postgresql+psycopg2://{DB_USER_TEST}:{DB_PASS_TEST}@{DB_HOST_TEST}:{DB_PORT_TEST}/{DB_NAME_TEST}"
 test_engine = create_engine(TEST_DATABASE_URI, echo=False)
 TestSession = scoped_session(sessionmaker(bind=test_engine))
-
 
 def create_migration_if_needed():
     """
@@ -27,6 +34,7 @@ def create_migration_if_needed():
     Используем subprocess для вызова Alembic через командную строку.
     """
     try:
+        print("Пытаемся создать миграцию...")
         subprocess.run(
             [
                 "alembic",
@@ -52,7 +60,6 @@ def apply_migrations(database_uri):
 
     command.upgrade(alembic_cfg, "head")  # Применяем миграции до последней версии
 
-
 @pytest.fixture(scope="session")
 def test_db():
     """
@@ -61,11 +68,10 @@ def test_db():
 
     # Применяем миграции для тестовой базы данных
     apply_migrations(TEST_DATABASE_URI)
-    # yield
+    yield
+    print("Миграции применены и база готова для тестов")
     # # После тестов очищаем базу
     # Base.metadata.drop_all(bind=test_engine)
-
-
 
 @pytest.fixture(scope="function")
 def db_session(test_db):
@@ -77,3 +83,4 @@ def db_session(test_db):
     finally:
         session.rollback()
         session.close()
+

@@ -1,13 +1,8 @@
 import pytest
 
 from app.src.database.models import User, Tweets, ApiKey, Like, Image
+from tests.conftest import data
 
-data = {
-    "names": ["John", "Smith", "Stive"],
-    "api-keys": ["dk5", 123, 5666],
-    "filename": ["test_path.png", "test_path.jpg"],
-    "content": ["Hello world!", "test message."]
-}
 
 @pytest.fixture(scope="function")
 def test_user_data(db_session):
