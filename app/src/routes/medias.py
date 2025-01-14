@@ -1,10 +1,13 @@
+from app.src.database.models import Session
+from app.src.routes.FlaskAppSubSettings import api, logger
+from app.src.schemas.schemas import media_response_model, media_upload_model
+from app.src.utils.media_services import (
+    QueriesDatabase,
+    allowed_file,
+    save_image_on_system,
+)
 from flask import request
 from flask_restx import Resource
-
-from app.src.routes.FlaskAppSubSettings import api, logger
-from app.src.database.models import Session
-from app.src.schemas.schemas import media_response_model, media_upload_model
-from app.src.utils.media_services import allowed_file, QueriesDatabase, save_image_on_system
 
 
 @api.route("/api/medias")
@@ -24,12 +27,17 @@ class MediaUploadResource(Resource):
             media_file = request.files["file"]
 
             if not media_file or not allowed_file(media_file.filename):
-                return {"result": False, "message": "Invalid file format or no file provided"}, 400
+                return {
+                    "result": False,
+                    "message": "Invalid file format or no file provided",
+                }, 400
 
             image = db_queries.get_image(filename=media_file.filename)
 
             if not image:
-                image_id = db_queries.add_image_on_database(filename=media_file.filename)
+                image_id = db_queries.add_image_on_database(
+                    filename=media_file.filename
+                )
 
                 if image_id:
                     save_image_on_system(media_file=media_file, api_key=api_key)

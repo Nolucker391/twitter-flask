@@ -1,12 +1,16 @@
-from flask import jsonify
 import logging
+
+from app.src.database.models import ApiKey, User, user_following
+from flask import jsonify
+
 # from app.src.routes.FlaskAppSubSettings import logger
 from sqlalchemy import delete, insert, select
-from app.src.database.models import ApiKey, User, user_following
 
-logging.basicConfig(level=logging.INFO,
-                    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 def formatted_data_user(query):
     response_data = {
@@ -14,24 +18,13 @@ def formatted_data_user(query):
         "user": {
             "id": query.id,
             "name": query.name,
-            "followers": [
-                {
-                    "id": f.id,
-                    "name": f.name
-                }
-                for f in query.followers
-            ],
-            "following": [
-                {
-                    "id": f.id,
-                    "name": f.name
-                }
-                for f in query.following
-            ]
-        }
+            "followers": [{"id": f.id, "name": f.name} for f in query.followers],
+            "following": [{"id": f.id, "name": f.name} for f in query.following],
+        },
     }
 
     return response_data
+
 
 class QueriesDatabase:
     def __init__(self, session):
@@ -54,7 +47,12 @@ class QueriesDatabase:
 
     def get_user_with_api(self, api_key):
         """Функция, для отображения информации о пользователе."""
-        query = self.session.query(User).join(ApiKey).filter(ApiKey.api_key == api_key).first()
+        query = (
+            self.session.query(User)
+            .join(ApiKey)
+            .filter(ApiKey.api_key == api_key)
+            .first()
+        )
 
         try:
             if not query:
@@ -68,7 +66,12 @@ class QueriesDatabase:
 
     def follow_processing_users(self, api_key, following_id):
         """Функция, для подписки и отписки на профиль пользователя."""
-        user = self.session.query(User).join(ApiKey).filter(ApiKey.api_key == api_key).first()
+        user = (
+            self.session.query(User)
+            .join(ApiKey)
+            .filter(ApiKey.api_key == api_key)
+            .first()
+        )
 
         try:
             select_user_query = select(User).where(User.id == following_id)
@@ -99,7 +102,9 @@ class QueriesDatabase:
                     #     "error_type": "FollowExist",
                     # }
                 else:
-                    stmt = insert(user_following).values(user_id=user.id, following_id=following_id)
+                    stmt = insert(user_following).values(
+                        user_id=user.id, following_id=following_id
+                    )
                     self.session.execute(stmt)
                     self.session.commit()
 

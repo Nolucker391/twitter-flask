@@ -1,11 +1,9 @@
-from flask import request, jsonify
-from flask_restx import Resource
-
-from app.src.routes.FlaskAppSubSettings import api, logger
 from app.src.database.models import Session
+from app.src.routes.FlaskAppSubSettings import api, logger
 from app.src.schemas.schemas import user_detail
-
 from app.src.utils.user_services import QueriesDatabase
+from flask import jsonify, request
+from flask_restx import Resource
 
 
 @api.route("/api/users/me")
@@ -74,10 +72,17 @@ class FollowUserResource(Resource):
             api_key: str = request.headers.get("api-key")
 
             if not api_key:
-                logger.error(f"DELETE Запрос на /users/{following_id.id}/follow не обработан. Пользователь с ключом <{api_key}> не найден.")
-                return {"result": False, "message": f"User with api_key{api_key} not found."}, 413
+                logger.error(
+                    f"DELETE Запрос на /users/{following_id.id}/follow не обработан. Пользователь с ключом <{api_key}> не найден."
+                )
+                return {
+                    "result": False,
+                    "message": f"User with api_key{api_key} not found.",
+                }, 413
 
-            query = db_queries.follow_processing_users(api_key=api_key, following_id=following_id)
+            query = db_queries.follow_processing_users(
+                api_key=api_key, following_id=following_id
+            )
 
             return query, 200
 
@@ -89,7 +94,6 @@ class FollowUserResource(Resource):
                 db_queries.close_session()
             except Exception as close_error:
                 logger.error(f"Error closing session: {close_error}")
-
 
     @api.response(200, "Success")
     @api.doc(description="Follow a user")

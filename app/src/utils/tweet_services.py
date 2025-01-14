@@ -1,11 +1,10 @@
-from sqlalchemy import insert, select, update, delete
-
+from app.src.database.models import ApiKey, Image, Tweets, User
 from app.src.routes.FlaskAppSubSettings import logger
-from app.src.database.models import User, ApiKey, Tweets, Image
+from sqlalchemy import delete, insert, select, update
 
 
 def reformatting_data(tweets):
-    """ Функция, для правильного вывода формата данных о твитах. """
+    """Функция, для правильного вывода формата данных о твитах."""
     response_data = {
         "result": True,
         "tweets": [
@@ -17,15 +16,9 @@ def reformatting_data(tweets):
                     for key in tweet.author.api_key
                     for link in tweet.attachments
                 ],
-                "author": {
-                    "id": tweet.author_id,
-                    "name": tweet.author.name
-                },
+                "author": {"id": tweet.author_id, "name": tweet.author.name},
                 "likes": [
-                    {
-                        "user_id": like.user_like.id,
-                        "name": like.user_like.name
-                    }
+                    {"user_id": like.user_like.id, "name": like.user_like.name}
                     for like in tweet.likes_by_users
                 ],
             }
@@ -35,22 +28,32 @@ def reformatting_data(tweets):
 
     return response_data
 
+
 class TweetQueriesDatabase:
     def __init__(self, session):
-        """ Инициализация сессии базы данных. """
+        """Инициализация сессии базы данных."""
         self.session = session
 
     def get_tweets(self):
-        """ Получение всех твитов с БД. """
+        """Получение всех твитов с БД."""
         query_tweets = self.session.execute(select(Tweets)).scalars().all()
 
         return query_tweets
 
     def add_tweet(self, api_key, tweet_data):
-        """ Добавление твита в БД. """
+        """Добавление твита в БД."""
         try:
-            query = self.session.query(User).join(ApiKey).filter(ApiKey.api_key == api_key).first()
-            query2 = self.session.execute(insert(Tweets).values(author_id=query.id, content=tweet_data.get("tweet_data")).returning(Tweets.id))
+            query = (
+                self.session.query(User)
+                .join(ApiKey)
+                .filter(ApiKey.api_key == api_key)
+                .first()
+            )
+            query2 = self.session.execute(
+                insert(Tweets)
+                .values(author_id=query.id, content=tweet_data.get("tweet_data"))
+                .returning(Tweets.id)
+            )
 
             self.session.commit()
 
@@ -60,7 +63,9 @@ class TweetQueriesDatabase:
 
             if media_ids:
                 for m_id in media_ids:
-                    self.session.execute(update(Image).where(Image.id == m_id).values(tweet_id=tweet_id))
+                    self.session.execute(
+                        update(Image).where(Image.id == m_id).values(tweet_id=tweet_id)
+                    )
                     self.session.commit()
 
             return tweet_id
@@ -69,18 +74,29 @@ class TweetQueriesDatabase:
             logger.error(f"Error add tweet from database: {e}")
 
     def delete_tweet(self, api_key, tweet_id):
-        """ Удаление твита в БД. """
+        """Удаление твита в БД."""
         try:
-            user = self.session.query(User).join(ApiKey).filter(ApiKey.api_key == api_key).first()
+            user = (
+                self.session.query(User)
+                .join(ApiKey)
+                .filter(ApiKey.api_key == api_key)
+                .first()
+            )
             tweet = self.session.query(Tweets).filter(Tweets.id == tweet_id).first()
 
             if not tweet:
                 logger.info(f"Твит с id({tweet_id}) не найден.")
-                return {"result": False, "message": f"Tweet with id({tweet_id}) not found."}, 413
+                return {
+                    "result": False,
+                    "message": f"Tweet with id({tweet_id}) not found.",
+                }, 413
 
             if tweet.author_id != user.id:
                 logger.info(f"Пользователь id({user.id}) - не является автором твита.")
-                return {"result": False, "message": f"User id({user.id}) is not the author of the tweet."}, 403
+                return {
+                    "result": False,
+                    "message": f"User id({user.id}) is not the author of the tweet.",
+                }, 403
 
             tweet_del = delete(Tweets).where(Tweets.id == tweet_id)
             self.session.execute(tweet_del)

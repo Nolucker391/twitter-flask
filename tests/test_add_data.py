@@ -1,6 +1,5 @@
 import pytest
-
-from app.src.database.models import User, Tweets, ApiKey, Like, Image
+from app.src.database.models import ApiKey, Image, Like, Tweets, User
 from tests.conftest import data
 
 
@@ -17,6 +16,7 @@ def test_user_data(db_session):
 
     return user
 
+
 @pytest.fixture(scope="function")
 def test_tweet_data(db_session, test_user_data):
     """Тест для создания твита в БД."""
@@ -26,6 +26,7 @@ def test_tweet_data(db_session, test_user_data):
     db_session.commit()
 
     return tweet_content
+
 
 @pytest.fixture(scope="function")
 def test_tweet_attachments(db_session, test_tweet_data, test_user_data):
@@ -39,7 +40,9 @@ def test_tweet_attachments(db_session, test_tweet_data, test_user_data):
     db_session.commit()
 
 
-def test_all_parameters_on_database(db_session, test_tweet_data, test_user_data, test_tweet_attachments):
+def test_all_parameters_on_database(
+    db_session, test_tweet_data, test_user_data, test_tweet_attachments
+):
     tweet = db_session.query(Tweets).filter_by(author_id=test_user_data.id).first()
 
     assert tweet is not None

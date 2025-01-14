@@ -1,24 +1,24 @@
 import os
 
-from sqlalchemy import select, insert
-
-from app.src.routes.FlaskAppSubSettings import ALLOWED_EXTENSIONS, UPLOAD_FOLDER, logger
 from app.src.database.models import Image
+from app.src.routes.FlaskAppSubSettings import ALLOWED_EXTENSIONS, UPLOAD_FOLDER, logger
+from sqlalchemy import insert, select
 
 
 def allowed_file(filename):
-    """ Функция, для проверки, загружаемого файла, допустимого формата. """
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    """Функция, для проверки, загружаемого файла, допустимого формата."""
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def save_image_on_system(media_file, api_key) -> None:
-    """ Функция, для сохранения изображения в системе проекта. """
+    """Функция, для сохранения изображения в системе проекта."""
     try:
         out_file_path = f"{UPLOAD_FOLDER}_{api_key}"  # путь в контейнере
         file_path = os.path.join(out_file_path, media_file.filename)
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
         if not os.path.exists(out_file_path):
-           logger.info(f"Directory {out_file_path} does not exist!")
+            logger.info(f"Directory {out_file_path} does not exist!")
 
         media_file.save(file_path)
 
@@ -33,7 +33,7 @@ class QueriesDatabase:
         self.session = session
 
     def get_image(self, filename):
-        """ Функция, для просмотра изображения на опубликованный твит. """
+        """Функция, для просмотра изображения на опубликованный твит."""
         try:
             query = select(Image).where(Image.filename == filename)
             result = self.session.execute(query).scalar_one_or_none()
@@ -67,5 +67,3 @@ class QueriesDatabase:
     def close_session(self):
         """Закрыть сессию после завершения работы."""
         self.session.close()
-
-
