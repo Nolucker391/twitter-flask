@@ -156,8 +156,8 @@ def test_post_del_likes(client):
         "/api/tweets/1/likes",
         headers=headers,
     )
-    assert response_post.status_code == 200
-    assert json.loads(response_post.text) == {"result": True}
+    assert response_del.status_code == 200
+    assert json.loads(response_del.text) == {"result": True}
 
 def test_post_media(client):
     """Тестовый запрос на загрузку фото к твиту."""
