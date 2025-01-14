@@ -61,6 +61,7 @@ class TweetQueriesDatabase:
 
             media_ids = tweet_data.get("tweet_media_ids")
 
+            #tyt
             if media_ids:
                 for m_id in media_ids:
                     self.session.execute(
