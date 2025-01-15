@@ -4,7 +4,6 @@ from app.src.schemas.schemas import media_response_model, media_upload_model
 from app.src.utils.media_services import (
     QueriesDatabase,
     allowed_file,
-    save_image_on_system,
 )
 from flask import request
 from flask_restx import Resource
@@ -31,22 +30,9 @@ class MediaUploadResource(Resource):
                     "result": False,
                     "message": "Invalid file format or no file provided",
                 }, 400
+            image = db_queries.add_image_on_database(media_file=media_file, api_key=api_key)
 
-            image = db_queries.get_image(filename=media_file.filename)
-
-            if not image:
-                image_id = db_queries.add_image_on_database(
-                    filename=media_file.filename
-                )
-
-                if image_id:
-                    save_image_on_system(media_file=media_file, api_key=api_key)
-                    return {"result": True, "media_id": image_id}, 200
-
-                else:
-                    return {"result": False, "message": "Error saving to database"}, 500
-
-            return {"result": True, "media_id": image.id}, 200
+            return {"result": True, "media_id": image}, 200
 
         except Exception as e:
             logger.error(f"Error in POST /api/medias: {e}")

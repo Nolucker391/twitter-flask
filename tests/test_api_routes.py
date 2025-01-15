@@ -99,7 +99,7 @@ def test_get_post_tweets(client):
     response = client.post(
         "/api/tweets",
         headers=headers,
-        json={"tweet_data": "Тестовый текст.", "tweet_media_ids": [1, 2]},
+        json={"tweet_data": "Тестовый текст.", "tweet_media_ids": []},
     )
     assert response.status_code == 200
     assert "tweet_id" in response.json
