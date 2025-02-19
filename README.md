@@ -12,11 +12,9 @@
 - **Подписываться и отписываться от других пользователей.**
 - **Получать информацию о пользователях и твитах.**
 
-## Пример визуала проекта
+## Демо-версия
 
-<p>
-  <img src="/TestImages/readme_media/photo_5202193955649875262_y.jpg" alt="Demo" width="500" height="350"> <img src="/TestImages/readme_media/photo_5202193955649875272_y.jpg" alt="Demo" width="500" height="350"> 
-</p>
+https://github.com/user-attachments/assets/d9dfcf79-e273-40b8-9707-0036dd4fde69
 
 ## Инструкция по запуску проекта 
 
