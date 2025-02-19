@@ -1,6 +1,18 @@
-<img src="/TestImages/readme_media/11.png" alt="Demo" width="80" height="20"> <img src="/TestImages/readme_media/22.png" alt="Demo" width="80" height="20"> <img src="/TestImages/readme_media/33.png" alt="Demo" width="80" height="20"> <img src="/TestImages/readme_media/44.png" alt="Demo" width="80" height="20">
+<h1 align="center">MicroService - Twitter<br>
+<br>
+<img src="/TestImages/readme_media/twitter.png" alt="Demo" width="50" height="50">
+  
+<br>
+<br>
 
-# <img src="/TestImages/readme_media/twitter.png" alt="Demo" width="50" height="50"> <sup>MicroService - Twitter</sup>
+<img src="TestImages/readme_media/logo.png" alt="Demo" width="300" height="250">
+
+</h1>
+
+<hr />
+
+
+<img src="/TestImages/readme_media/11.png" alt="Demo" width="80" height="20"> <img src="/TestImages/readme_media/22.png" alt="Demo" width="80" height="20"> <img src="/TestImages/readme_media/33.png" alt="Demo" width="80" height="20"> <img src="/TestImages/readme_media/44.png" alt="Demo" width="80" height="20">
 
 ## Описание 
 
